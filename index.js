@@ -12,23 +12,27 @@ class SeparateStream extends Writable {
   }
 
   async _write (chunk, encoding, callback) {
-    let next = false
+    try {
+      let next = false
 
-    if (!this.output) {
-      next = true
-    } else if (this.split(chunk)) {
-      await this._endOutput()
+      if (!this.output) {
+        next = true
+      } else if (this.split(chunk)) {
+        await this._endOutput()
 
-      next = true
+        next = true
+      }
+
+      if (next) {
+        this.output = new PassThrough({ objectMode: true })
+
+        await this.change(this.output, chunk)
+      }
+
+      this.output.write(this.map(chunk), null, callback)
+    } catch (err) {
+      callback(err)
     }
-
-    if (next) {
-      this.output = new PassThrough({ objectMode: true })
-
-      await this.change(this.output, chunk)
-    }
-
-    this.output.write(this.map(chunk), null, callback)
   }
 
   async _final (callback) {
