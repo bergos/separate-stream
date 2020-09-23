@@ -70,6 +70,27 @@ describe('separate-stream', () => {
     strictEqual(content, 'a')
   })
 
+  it('should handled errors thrown in the change function', async () => {
+    const stream = new SeparateStream({
+      change: async () => {
+        throw new Error('test')
+      }
+    })
+
+    stream.write('a')
+    stream.end()
+
+    let error = null
+
+    try {
+      await untilFinished(stream)
+    } catch (err) {
+      error = err
+    }
+
+    strictEqual(error instanceof Error, true)
+  })
+
   it('should forward all chunks to the first stream if there is no split function given', async () => {
     let content = null
 
@@ -110,6 +131,29 @@ describe('separate-stream', () => {
     await untilFinished(stream)
 
     deepStrictEqual(content, ['b', 'c'])
+  })
+
+  it('should handle errors thrown in split function', async () => {
+    const stream = new SeparateStream({
+      split: () => {
+        throw new Error('test')
+      }
+    })
+
+    stream.write('a')
+    stream.write('b')
+    stream.write('c')
+    stream.end()
+
+    let error = null
+
+    try {
+      await untilFinished(stream)
+    } catch (err) {
+      error = err
+    }
+
+    strictEqual(error instanceof Error, true)
   })
 
   it('should create a new stream if split returns true', async () => {
@@ -175,5 +219,28 @@ describe('separate-stream', () => {
     await untilFinished(stream)
 
     deepStrictEqual(content, ['A', 'B', 'C'])
+  })
+
+  it('should handle errors thrown in map function', async () => {
+    const stream = new SeparateStream({
+      map: () => {
+        throw new Error('test')
+      }
+    })
+
+    stream.write('a')
+    stream.write('b')
+    stream.write('c')
+    stream.end()
+
+    let error = null
+
+    try {
+      await untilFinished(stream)
+    } catch (err) {
+      error = err
+    }
+
+    strictEqual(error instanceof Error, true)
   })
 })

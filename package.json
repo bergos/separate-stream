@@ -1,6 +1,6 @@
 {
   "name": "separate-stream",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Separate one stream into multiple streams",
   "main": "index.js",
   "scripts": {
